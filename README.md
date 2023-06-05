@@ -15,13 +15,13 @@ Nothing fancy ... if you know your way around [nextjs](https://nextjs.org/), it 
 - Initial Setup: `git clone https://github.com/orderlion/mongoMyAdmin.git`
 - Install packages: `yarn install`
 - Make sure that your mondoDB is running
-- Update your `mongoMyAdmin.config.js` file accordingly
+- Update your `mongoMyAdmin.config.js` file accordingly (or make sure to set the `MONGO_URL` env var)
 - ???
 - Profit!
 
 ## Usage:
 
-Very straightforward. You can pass the `MONGO_URL` either as environment variable or define it our config file: `mongoMyAdmin.config.js`.
+Very straightforward. You can pass the `MONGO_URL` either as environment variable or define it in the config file: `mongoMyAdmin.config.js`.
 
 ```sh
 MONGO_URL="mongodb://localhost:27017/yourdb" yarn run dev
@@ -52,7 +52,7 @@ yarn run docker-build
 MONGO_URL="mongodb://localhost:27017/yourdb" yarn run docker-run
 ```
 
-We are automatically replacing `localhost` in your mongoDb connection string with `172.17.0.1` (your host's local IP to access from the inside the docker container).
+We are automatically replacing `localhost` in your mongoDb connection string with `172.17.0.1` (your host's local IP to access it from inside the docker container).
 
 Please make sure to add `172.17.0.1` to your `bindIp` setting inside your [`mongod.conf` file](https://www.mongodb.com/docs/manual/reference/configuration-options/).
 
@@ -63,8 +63,7 @@ Without this setting, you will not be able to connect to your host's mongoDB ins
 
 <img src="public/images/butwhy.gif" width="320" />
 
-
-We checked pretty much *all* solutions out there, but not a single once covered our use case:
+We checked pretty much *all* solutions out there, but not a single one covered our use case:
 
 - proper quick pagination
 - easy to use JSON query and JSON doc editor (Monaco)
@@ -90,5 +89,7 @@ We checked pretty much *all* solutions out there, but not a single once covered 
 - CRUD indexes
 - change page size of pagination
 - support for multiple dbs
+
+---
 
 Have fun! Made with ❤️ in Vienna, by <a href="https://orderlion.com" target="_blank">Orderlion</a>.
