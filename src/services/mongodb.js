@@ -20,7 +20,6 @@ export const client = new MongoClient(MONGO_URL);
 
 async function initClient() {
   try {
-    console.info('mongoMyAdmin: Connecting to MONGO_URL:', MONGO_URL);
     await client.connect();
     await client.db('admin').command({ ping: 1 });
     client._isConnected = true;
