@@ -58,6 +58,27 @@ Please make sure to add `172.17.0.1` to your `bindIp` setting inside your [`mong
 
 Without this setting, you will not be able to connect to your host's mongoDB instance from inside the container.
 
+If you want to use **`docker-compose.yml`**, a simple usage might look a bit like this:
+
+```yml
+version: "3"
+services:
+
+  # ... all your other services go here!
+
+  mongomyadmin:
+    build:
+      context: ./path/to/your/mongoMyAdmin
+      args: 
+        # We need the MONGO_URL also as ARG at build time
+        - MONGO_URL=mongodb://user:password@host.mongodb.net/yourdb
+    container_name: mongomyadmin
+    environment:
+      # the actual MONGO_URL used at run time
+      - MONGO_URL=mongodb://user:password@host.mongodb.net/yourdb
+    restart: unless-stopped
+```
+
 ---
 # But why? (Features)
 
