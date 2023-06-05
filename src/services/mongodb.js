@@ -31,7 +31,7 @@ async function initClient() {
 
 export async function initDb() {
   if (!client?._isConnected) await initClient();
-  if (!db) db = client.db('meteor');
+  if (!db) db = client.db();
 }
 
 export async function getCollections() {
