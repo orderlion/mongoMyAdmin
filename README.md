@@ -83,4 +83,12 @@ We checked pretty much *all* solutions out there, but not a single once covered 
   <img src="public/screenshots/collection.png" width="320" /> <img src="public/screenshots/document.png" width="320" />
 </p>
 
+---
+
+### Planned upcoming features
+
+- CRUD indexes
+- change page size of pagination
+- support for multiple dbs
+
 Have fun! Made with ❤️ in Vienna, by <a href="https://orderlion.com" target="_blank">Orderlion</a>.

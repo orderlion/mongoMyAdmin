@@ -1,15 +1,15 @@
 {
   "name": "mongomyadmin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "docker-build": "docker build -t 'mongomyadmin:0.2.0' .",
-    "docker-run": "docker run -p 3000:3000 -h 'mongoMyAdmin' --name 'mongoMyAdmin' 'mongomyadmin:0.2.0'",
-    "docker-run-local": "docker run -p 3000:3000 -h 'localhost' --name 'mongoMyAdmin' 'mongomyadmin:0.2.0'"
+    "docker-build": "docker build -t 'mongomyadmin:0.2.1' .",
+    "docker-run": "docker run -p 3000:3000 -h 'mongoMyAdmin' --name 'mongoMyAdmin' 'mongomyadmin:0.2.1'",
+    "docker-run-local": "docker run -p 3000:3000 -h 'localhost' --name 'mongoMyAdmin' 'mongomyadmin:0.2.1'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
