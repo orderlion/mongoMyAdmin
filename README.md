@@ -52,6 +52,16 @@ yarn run docker-build
 MONGO_URL="mongodb://localhost:27017/yourdb" yarn run docker-run
 ```
 
+If you want to access the mongoMyAdmin docker container directly from your host (instead of running it behind a reverse proxy like traefik), make sure to also expose port 3000 in the Dockerfile, by adding the following line right before the final `CMD` property in your `Dockerfile`:
+
+```
+// add this line:
+EXPOSE 3000
+
+// the following line should already be inside your Dockerfile at the very end:
+CMD ["node", "server.js"]
+```
+
 We are automatically replacing `localhost` in your mongoDb connection string with `172.17.0.1` (your host's local IP to access it from inside the docker container).
 
 Please make sure to add `172.17.0.1` to your `bindIp` setting inside your [`mongod.conf` file](https://www.mongodb.com/docs/manual/reference/configuration-options/).
