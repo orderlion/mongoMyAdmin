@@ -20,7 +20,7 @@ export default function CollectionsList({ params }) {
   return (
     <>
       <h4 style={{ marginBottom: theme.spacing.md }}>Collections:</h4>
-      <Navbar.Section grow component={ScrollArea} mx="-xs" px="xs">
+      <Navbar.Section grow component={ScrollArea} mx="-xs" px="xs" pb="xl">
         <List
           spacing="xs"
           size="sm"
