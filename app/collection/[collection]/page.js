@@ -3,9 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
+import { jsonrepair } from 'jsonrepair';
 import PaginationContainer from '@/src/ui/PaginationContainer';
 import { useQueryParam, NumberParam, withDefault, JsonParam } from 'use-query-params';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, getHotkeyHandler } from '@mantine/hooks';
 import { Title, Pagination, Flex, JsonInput, Text, ThemeIcon, Button, TextInput, Divider, Stack, Modal } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import useNotifications from '@/src/ui/useNotifications';
@@ -100,10 +101,11 @@ export default function Collection({ params = {} }) {
   }
   function onQueryChange(e){
     if (e) e.preventDefault();
-    const query = queryInput.current.value;
+    const query = jsonrepair(queryInput.current.value || '');
+    queryInput.current.value = query;
+    onPageChange(1);
     setQueryParam(query);
     setQuery(query);
-    onPageChange(1);
   }
   function resetQuery(e) {
     if (e) e.preventDefault();
@@ -127,6 +129,9 @@ export default function Collection({ params = {} }) {
           defaultValue={query || '{}'}
           w={800}
           size='md'
+          onKeyDown={getHotkeyHandler([
+            ['Enter', onQueryChange],
+          ])}
           styles={{
             input: {
               fontFamily: "'Courier New', monospace",
