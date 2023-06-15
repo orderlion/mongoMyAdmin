@@ -55,7 +55,6 @@ export default function Document({ params }) {
 
   function deleteDocument(e) {
     if (e) e.preventDefault();
-    console.log('DELETE', _id);
     saveNewDocument(null, 'DELETE');
   }
 
@@ -67,6 +66,7 @@ export default function Document({ params }) {
         body: JSON.stringify(newDoc)
       });
       const updateResp = await resp.json();
+      console.log('updateResp', updateResp);
       if (method === 'DELETE') {
         closeConfirmModal();
         notifications.success(`Document deleted successfully!`);

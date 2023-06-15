@@ -5,9 +5,10 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import PaginationContainer from '@/src/ui/PaginationContainer';
 import { useQueryParam, NumberParam, withDefault, JsonParam } from 'use-query-params';
-import { Title, Pagination, Flex, JsonInput, Text, ThemeIcon, Button, TextInput, Divider } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Title, Pagination, Flex, JsonInput, Text, ThemeIcon, Button, TextInput, Divider, Stack, Modal } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
+import useNotifications from '@/src/ui/useNotifications';
 
 const PAGE_SIZE = 20;
 
@@ -38,6 +39,9 @@ export default function Collection({ params = {} }) {
   const { collection } = params;
   const [pageParam, setPageParam] = useQueryParam('page', withDefault(NumberParam, 1));
   const [queryParam, setQueryParam] = useQueryParam('query', withDefault(JsonParam, '{}'));
+
+  const notifications = useNotifications();
+  const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
 
   const [page, setPage] = useState(pageParam);
   const [query, setQuery] = useState(queryParam || null);
@@ -70,6 +74,26 @@ export default function Collection({ params = {} }) {
     }
   }
 
+  async function deleteAllDocuments(e) {
+    if (e) e.preventDefault();
+    try {
+      const searchParams = new URLSearchParams();
+      searchParams.set('query', query);
+      const resp = await fetch(`/api/${collection}?${searchParams.toString()}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const deleteResp = await resp.json();
+      console.log('deleteResp', deleteResp);
+      closeConfirmModal();
+      notifications.success(`Documents deleted successfully!`);
+      resetQuery();
+    } catch(err) {
+      console.error(err);
+      notifications.error(`Something went wrong! Check the console!`);
+    }
+  }
+
   function onPageChange(page) {
     setPageParam(page);
     setPage(page);
@@ -77,16 +101,16 @@ export default function Collection({ params = {} }) {
   function onQueryChange(e){
     if (e) e.preventDefault();
     const query = queryInput.current.value;
-    onPageChange(1);
     setQueryParam(query);
     setQuery(query);
+    onPageChange(1);
   }
   function resetQuery(e) {
     if (e) e.preventDefault();
-    onPageChange(1);
     queryInput.current.value = '{}';
     setQueryParam('{}');
     setQuery('{}');
+    onPageChange(1);
   }
 
   return (
@@ -97,7 +121,7 @@ export default function Collection({ params = {} }) {
           <Text>Total Count: <b>{count}</b> documents</Text>
         </div>
       </Flex>
-      <Flex mb="lg" align="center">
+      <Flex mb="lg" align="flex-start">
         <TextInput
           ref={queryInput}
           defaultValue={query || '{}'}
@@ -114,9 +138,16 @@ export default function Collection({ params = {} }) {
           Set Query
         </Button>
         <div style={{ margin: 'auto' }} />
-        <Button size="md" ml="sm" color="red" onClick={resetQuery}>
-          Reset Query
-        </Button>
+        {query !== '{}' ? (
+          <Stack align="center" ml="sm">
+            <Button size="md" color="red" onClick={resetQuery}>
+              Reset Query
+            </Button>
+            <Button variant="subtle" color="red" size="xs" onClick={openConfirmModal}>
+              Delete all documents
+            </Button>
+          </Stack>
+        ) : null}
       </Flex>
       <Divider my="xl" />
       <div style={{ paddingBottom: 50 }}> {/* To allow gap at bottom for fixed bottom pagination */}
@@ -150,6 +181,17 @@ export default function Collection({ params = {} }) {
           )
         }) }
       </div>
+      <Modal opened={confirmModalOpened} onClose={closeConfirmModal} title="Are you sure?" centered>
+        <Text size="md">Do you want to delete ALL documents matching this query?</Text>
+        <Flex mt="lg" align="center" justify="space-between">
+          <Button size="sm" color="gray" onClick={closeConfirmModal}>
+            Cancel
+          </Button>
+          <Button size="sm" color="red" onClick={deleteAllDocuments}>
+            DELETE
+          </Button>
+        </Flex>
+      </Modal>
       <PaginationContainer>
         <Pagination color="teal" position="center" value={page} onChange={onPageChange} total={Math.ceil(count / PAGE_SIZE)} />
       </PaginationContainer>
