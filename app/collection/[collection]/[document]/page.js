@@ -95,7 +95,7 @@ export default function Document({ params }) {
           </Button>
         </div>
       </Flex>
-      { isLoading && <Loader color="green" size="sm" style={{ margin: 'auto' }} /> }
+      { isLoading && <Loader color="teal" size="sm" style={{ margin: 'auto' }} /> }
       { error && <pre>{error}</pre> }
       { !isLoading && !error && (
         <>

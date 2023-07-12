@@ -4,14 +4,35 @@ import { getCollection } from '@/src/services/mongodb';
 
 // /collection/products: COLLECTION LEVEL
 
+String.prototype.replaceAt = function(index, replacement) {
+  return this.substring(0, index) + replacement + this.substring(index + (replacement.length || 1));
+}
+
 function getQuery(queryParam) {
   queryParam = jsonrepair(queryParam || '');
   let query = null;
   if (queryParam) {
     try {
       query = JSON.parse(queryParam);
+      try {
+        // iterate over query keys and check, if there is one which should actually be a regex:
+        for (const [key, value] of Object.entries(query)) {
+          if (typeof value !== 'string') continue;
+          const couldBeRegex = (value.match(/\//g) || []).length >= 2; // a regex should have >= 2 slashes
+          if (couldBeRegex) {
+            const firstSlashIndex = value.indexOf('/');
+            const lastSlashIndex = value.lastIndexOf('/');
+            const regexOptions = value.substring(lastSlashIndex + 1);
+            // we need to remove the first and last slash to create a proper regex
+            const regex = value.replaceAt(firstSlashIndex, '').replaceAt((lastSlashIndex - 1), '').replace(regexOptions, '');
+            query[key] = new RegExp(regex, regexOptions);
+          }
+        }
+      } catch(regexErr) {
+        console.error('getQuery(): Could not properly parse regex:', searchParams.get('query'), regexErr);
+      }
     } catch(err) {
-      console.error('Could not parse JSON query:', searchParams.get('query'));
+      console.error('getQuery(): Could not parse JSON query:', searchParams.get('query'), err);
       query = null;
     }
   }

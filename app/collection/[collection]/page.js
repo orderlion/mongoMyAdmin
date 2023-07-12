@@ -7,8 +7,8 @@ import { jsonrepair } from 'jsonrepair';
 import PaginationContainer from '@/src/ui/PaginationContainer';
 import { useQueryParam, NumberParam, withDefault, JsonParam } from 'use-query-params';
 import { useDisclosure, getHotkeyHandler } from '@mantine/hooks';
-import { Title, Pagination, Flex, JsonInput, Text, ThemeIcon, Button, TextInput, Divider, Stack, Modal } from '@mantine/core';
-import { IconCheck } from '@tabler/icons-react';
+import { Box, Title, Pagination, Flex, JsonInput, Text, ActionIcon, ThemeIcon, Button, TextInput, Divider, Stack, Modal, Loader } from '@mantine/core';
+import { IconArrowBarDown, IconArrowBarUp } from '@tabler/icons-react';
 import useNotifications from '@/src/ui/useNotifications';
 
 const PAGE_SIZE = 20;
@@ -44,6 +44,7 @@ export default function Collection({ params = {} }) {
   const notifications = useNotifications();
   const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
 
+  const [allDocsExpanded, toggleExpandAllDocs] = useState(false);
   const [page, setPage] = useState(pageParam);
   const [query, setQuery] = useState(queryParam || null);
   const queryInput = useRef(null);
@@ -101,7 +102,8 @@ export default function Collection({ params = {} }) {
   }
   function onQueryChange(e){
     if (e) e.preventDefault();
-    const query = jsonrepair(queryInput.current.value || '');
+    // const query = jsonrepair(queryInput.current.value || '');
+    const query = queryInput.current.value || '';
     queryInput.current.value = query;
     onPageChange(1);
     setQueryParam(query);
@@ -119,9 +121,9 @@ export default function Collection({ params = {} }) {
     <main>
       <Flex mb="lg" align="center" justify="space-between">
         <Title order={1}>{collection}</Title>
-        <div>
+        {!isLoading &&
           <Text>Total Count: <b>{count}</b> documents</Text>
-        </div>
+        }
       </Flex>
       <Flex mb="lg" align="flex-start">
         <TextInput
@@ -143,49 +145,52 @@ export default function Collection({ params = {} }) {
           Set Query
         </Button>
         <div style={{ margin: 'auto' }} />
+        {!isLoading &&
+          <Button size="md" ml="sm" variant="outline" color="teal" onClick={() => toggleExpandAllDocs(!allDocsExpanded)}>
+            {!allDocsExpanded ?
+              <><IconArrowBarDown size={24} /> Open</>
+            :
+              <><IconArrowBarUp size={24} /> Close</>
+            }
+          </Button>
+        }
         {query !== '{}' ? (
           <Stack align="center" ml="sm">
             <Button size="md" color="red" onClick={resetQuery}>
               Reset Query
             </Button>
-            <Button variant="subtle" color="red" size="xs" onClick={openConfirmModal}>
-              Delete all documents
-            </Button>
+            {!isLoading &&
+              <Button variant="subtle" color="red" size="xs" onClick={openConfirmModal}>
+                Delete all documents
+              </Button>
+            }
           </Stack>
         ) : null}
       </Flex>
       <Divider my="xl" />
-      <div style={{ paddingBottom: 50 }}> {/* To allow gap at bottom for fixed bottom pagination */}
-        { docs?.map((doc) => {
-          const label = (
-            <Text>_id: <b>{doc._id}</b> | <a onClick={() => copyToClipboard(doc._id)}>Copy _id</a> | <a onClick={() => copyToClipboard(`${location.origin}${location.pathname}/${doc._id}`)}>Copy link</a></Text>
-          );
-          return (
-            <Flex
-              key={doc._id}
-              align="flex-end"
-              justify="space-between"
-              mb="xl"
-            >
-              <JsonInput
-                label={label}
-                placeholder=""
-                validationError="Invalid JSON"
-                formatOnBlur
-                // autosize
-                minRows={4}
-                defaultValue={JSON.stringify(doc || {}, null, 2)}
-                style={{
-                  width: '100%'
-                }}
-              />
-              <Link href={`/collection/${collection}/${doc._id}`}>
-                <Button color="dark.3" ml="sm">EDIT</Button>
-              </Link>
-            </Flex>
-          )
-        }) }
-      </div>
+      {isLoading ? <Loader color="teal" size="lg" style={{ display: 'block', margin: '50px auto' }} /> : 
+        <div style={{ paddingBottom: 50 }}>
+          { docs?.map((doc) => {
+            return (
+              <Flex
+                key={doc._id}
+                align="flex-end"
+                justify="space-between"
+                mb="xl"
+              >
+                <DocumentJsonViewer
+                  doc={doc}
+                  pageDocCount={docs?.length}
+                  openByDefault={allDocsExpanded}
+                />
+                <Link href={`/collection/${collection}/${doc._id}`}>
+                  <Button color="dark.3" ml="sm">EDIT</Button>
+                </Link>
+              </Flex>
+            )
+          }) }
+        </div>
+      }
       <Modal opened={confirmModalOpened} onClose={closeConfirmModal} title="Are you sure?" centered>
         <Text size="md">Do you want to delete ALL documents matching this query?</Text>
         <Flex mt="lg" align="center" justify="space-between">
@@ -201,5 +206,56 @@ export default function Collection({ params = {} }) {
         <Pagination color="teal" position="center" value={page} onChange={onPageChange} total={Math.ceil(count / PAGE_SIZE)} />
       </PaginationContainer>
     </main>
+  )
+}
+
+function DocumentJsonViewer({ doc, pageDocCount, openByDefault }) {
+  if (!openByDefault) openByDefault = pageDocCount <= 5 ? true : false;
+  const [isOpen, toggleOpen] = useState(openByDefault);
+  useEffect(() => {
+    toggleOpen(openByDefault);
+  }, [openByDefault]);
+
+  const label = (
+    <Text>_id: <b>{doc._id}</b> | <a onClick={() => copyToClipboard(doc._id)}>Copy _id</a> | <a onClick={() => copyToClipboard(`${location.origin}${location.pathname}/${doc._id}`)}>Copy link</a></Text>
+  );
+  let maxRows = 50;
+  if (pageDocCount <= 5) maxRows = 100;
+  if (pageDocCount === 1) maxRows = 1000;
+  return (
+    <Box sx={{ flexGrow: 2, position: 'relative' }}>
+      {pageDocCount > 1 && 
+        <ActionIcon
+          sx={{
+            position: 'absolute',
+            zIndex: 3,
+            right: -10,
+            top: 16
+          }}
+          onClick={() => toggleOpen(!isOpen)}
+        >
+          <ThemeIcon color="teal" size="xl" radius="xl">
+            {!isOpen ?
+              <IconArrowBarDown size={24} />
+            :
+              <IconArrowBarUp size={24} />
+            }
+          </ThemeIcon>
+        </ActionIcon>
+      }
+      <JsonInput
+        label={label}
+        placeholder=""
+        validationError="Invalid JSON"
+        formatOnBlur
+        autosize={isOpen}
+        minRows={5}
+        maxRows={maxRows}
+        defaultValue={JSON.stringify(doc || {}, null, 2)}
+        style={{
+          width: '100%'
+        }}
+      />
+    </Box>
   )
 }
