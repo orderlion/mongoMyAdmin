@@ -3,12 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { jsonrepair } from 'jsonrepair';
 import PaginationContainer from '@/src/ui/PaginationContainer';
 import { useQueryParam, NumberParam, withDefault, JsonParam } from 'use-query-params';
 import { useDisclosure, getHotkeyHandler } from '@mantine/hooks';
 import { Box, Title, Pagination, Flex, JsonInput, Text, ActionIcon, ThemeIcon, Button, TextInput, Divider, Stack, Modal, Loader } from '@mantine/core';
-import { IconArrowBarDown, IconArrowBarUp } from '@tabler/icons-react';
+import { IconCheck, IconArrowBarDown, IconArrowBarUp } from '@tabler/icons-react';
 import useNotifications from '@/src/ui/useNotifications';
 
 const PAGE_SIZE = 20;
@@ -57,24 +56,6 @@ export default function Collection({ params = {} }) {
     `${collection}-${hashCode(JSON.stringify(query || {}))}-getCount`,
     () => getDocuments({ collection, page, query, getCount: true })
   );
-
-  function copyToClipboard(text) {
-    try {
-      navigator?.clipboard?.writeText(text);
-      notifications.show({
-        message: `Copied _id/link to clipboard.`,
-        autoClose: 3000,
-        color: 'green',
-        icon: (
-          <ThemeIcon color="teal" radius="xl">
-            <IconCheck size={18} />
-          </ThemeIcon>
-        )
-      });
-    } catch(err) {
-      console.error(err);
-    }
-  }
 
   async function deleteAllDocuments(e) {
     if (e) e.preventDefault();
@@ -210,6 +191,16 @@ export default function Collection({ params = {} }) {
 }
 
 function DocumentJsonViewer({ doc, pageDocCount, openByDefault }) {
+  const notifications = useNotifications();
+  function copyToClipboard(text) {
+    try {
+      navigator?.clipboard?.writeText(text);
+      notifications.success(`Copied _id/link to clipboard.`);
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
   if (!openByDefault) openByDefault = pageDocCount <= 5 ? true : false;
   const [isOpen, toggleOpen] = useState(openByDefault);
   useEffect(() => {
