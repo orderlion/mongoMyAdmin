@@ -46,7 +46,7 @@ export async function POST(req, { params = {} }) {
   if (oldDoc && newDoc) {
     ensureAttrType({ value: newDoc, compare: oldDoc });
   }
-  const updateResp = await collection.updateOne({ _id: newDocId }, { $set: { ...newDoc } }, { upsert: true });
+  const updateResp = await collection.replaceOne({ _id: newDocId }, newDoc, { upsert: true });
   return NextResponse.json(updateResp);
 }
 
@@ -83,7 +83,7 @@ function ensureAttrType({ value, compare, orig = null, path = '' }) {
   }
   const compareValue = objectPath.get(compare, path);
   // not a new value, but an updated one, but the TYPE changed:
-  if (typeof compareValue !== 'undefined' && typeof value !== typeof compareValue) {
+  if (typeof compareValue !== 'undefined' && typeof value !== 'undefined' && typeof value !== typeof compareValue) {
     if (compareValue instanceof Date) {
       value = new Date(value);
     }
