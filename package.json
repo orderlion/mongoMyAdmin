@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "docker-build": "docker build -t 'mongomyadmin:0.3.0' .",
+    "foobar": "echo $TEST",
+    "docker-build": "docker build --build-arg MONGO_URL=$MONGO_URL -t 'mongomyadmin:0.3.0' .",
     "docker-run": "docker run -p 3000:3000 -h 'mongoMyAdmin' --name 'mongoMyAdmin' 'mongomyadmin:0.3.0'",
-    "docker-run-local": "docker run -p 3000:3000 -h 'localhost' --name 'mongoMyAdmin' 'mongomyadmin:0.3.0'"
+    "docker-run-local": "docker run -p 3000:3000 -h 'localhost' -e MONGO_URL=$MONGO_URL --name 'mongoMyAdmin' 'mongomyadmin:0.3.0'",
+    "docker-run-local-readonly": "docker run -p 3000:3000 -h 'localhost' -e MONGO_URL=$MONGO_URL -e NEXT_PUBLIC_READ_ONLY=true --name 'mongoMyAdmin' 'mongomyadmin:0.3.0'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",

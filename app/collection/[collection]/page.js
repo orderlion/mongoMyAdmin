@@ -39,6 +39,7 @@ export default function Collection({ params = {} }) {
   const { collection } = params;
   const [pageParam, setPageParam] = useQueryParam('page', withDefault(NumberParam, 1));
   const [queryParam, setQueryParam] = useQueryParam('query', withDefault(JsonParam, '{}'));
+  console.log('process?.env?.NEXT_PUBLIC_READ_ONLY', process?.env?.NEXT_PUBLIC_READ_ONLY);
   const isReadOnly = process?.env?.NEXT_PUBLIC_READ_ONLY === 'true';
 
   const notifications = useNotifications();
