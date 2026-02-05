@@ -43,6 +43,8 @@ At the moment, the config file `mongoMyAdmin.config.js` (in root) only supports 
 }
 ```
 
+As a bonus, if you want to start mongoMyAdmin in read-only mode, just set this ENV var: `NEXT_PUBLIC_READ_ONLY=true`. **CAUTION**: This only removes some buttons, it does not prevent actual database updates. Make sure to use a `MONGO_URL` that uses a mongodb user that only has read access!
+
 ## Docker usage:
 
 Of course, first make sure that docker is properly setup on your machine. We prepared some helper functions for you:

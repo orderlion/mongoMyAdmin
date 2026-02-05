@@ -19,6 +19,7 @@ export default function Document({ params }) {
   const { collection, document: _id } = params;
   const router = useRouter();
   const notifications = useNotifications();
+  const isReadOnly = process?.env?.NEXT_PUBLIC_READ_ONLY === 'true';
 
   const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
 
@@ -89,11 +90,13 @@ export default function Document({ params }) {
             <a onClick={() => router.back()}><b>&laquo; BACK</b></a> | <a onClick={() => copyToClipboard(_id)}>Copy _id</a> | <a onClick={() => copyToClipboard(location.href)}>Copy link</a>
           </Text>
         </div>
-        <div>
-          <Button size="sm" ml="sm" color="red" onClick={openConfirmModal}>
-            Delete document
-          </Button>
-        </div>
+        {!isReadOnly && (
+          <div>
+            <Button size="sm" ml="sm" color="red" onClick={openConfirmModal}>
+              Delete document
+            </Button>
+          </div>
+        )}
       </Flex>
       { isLoading && <Loader color="teal" size="sm" style={{ margin: 'auto' }} /> }
       { error && <pre>{error}</pre> }
@@ -107,24 +110,28 @@ export default function Document({ params }) {
               onChange={setDocumentStr}
             />
           </div>
-          <Flex mt="md" align="flex-start">
-            <Text size="sm">Tip: We add JSON quotation marks for you - go for it!</Text>
-            <div style={{ margin: 'auto' }} />
-            <Button color="green" size="lg" onClick={saveDocument}>Save Changes</Button>
-          </Flex> 
+          {!isReadOnly && (
+            <Flex mt="md" align="flex-start">
+              <Text size="sm">Tip: We add JSON quotation marks for you - go for it!</Text>
+              <div style={{ margin: 'auto' }} />
+              <Button color="green" size="lg" onClick={saveDocument}>Save Changes</Button>
+            </Flex>
+          )}
         </>
       )}
-      <Modal opened={confirmModalOpened} onClose={closeConfirmModal} title="Are you sure?" centered>
-        <Text size="md">Do you want to delete this document?</Text>
-        <Flex mt="lg" align="center" justify="space-between">
-          <Button size="sm" color="gray" onClick={closeConfirmModal}>
-            Cancel
-          </Button>
-          <Button size="sm" color="red" onClick={deleteDocument}>
-            DELETE
-          </Button>
-        </Flex>
-      </Modal>
+      {!isReadOnly && (
+        <Modal opened={confirmModalOpened} onClose={closeConfirmModal} title="Are you sure?" centered>
+          <Text size="md">Do you want to delete this document?</Text>
+          <Flex mt="lg" align="center" justify="space-between">
+            <Button size="sm" color="gray" onClick={closeConfirmModal}>
+              Cancel
+            </Button>
+            <Button size="sm" color="red" onClick={deleteDocument}>
+              DELETE
+            </Button>
+          </Flex>
+        </Modal>
+      )}
     </>
   )
 }

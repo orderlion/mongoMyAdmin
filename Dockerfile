@@ -1,5 +1,5 @@
 # Based on: https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile from May 2023
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 ARG MONGO_URL
 ENV MONGO_URL=$MONGO_URL

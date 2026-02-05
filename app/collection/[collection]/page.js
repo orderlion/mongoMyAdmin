@@ -39,6 +39,7 @@ export default function Collection({ params = {} }) {
   const { collection } = params;
   const [pageParam, setPageParam] = useQueryParam('page', withDefault(NumberParam, 1));
   const [queryParam, setQueryParam] = useQueryParam('query', withDefault(JsonParam, '{}'));
+  const isReadOnly = process?.env?.NEXT_PUBLIC_READ_ONLY === 'true';
 
   const notifications = useNotifications();
   const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
@@ -136,13 +137,13 @@ export default function Collection({ params = {} }) {
           </Button>
         }
         {query !== '{}' ? (
-          <Stack align="center" ml="sm">
-            <Button size="md" color="red" onClick={resetQuery}>
+          <Stack align="flex-end" ml="sm">
+            <Button size="md" color="orange" variant="outline" onClick={resetQuery}>
               Reset Query
             </Button>
-            {!isLoading &&
-              <Button variant="subtle" color="red" size="xs" onClick={openConfirmModal}>
-                Delete all documents
+            {!isLoading && !isReadOnly &&
+              <Button color="red" size="sm" onClick={openConfirmModal}>
+                Delete {count || 'N/A'} documents
               </Button>
             }
           </Stack>
@@ -165,7 +166,7 @@ export default function Collection({ params = {} }) {
                   openByDefault={allDocsExpanded}
                 />
                 <Link href={`/collection/${collection}/${doc._id}`}>
-                  <Button color="dark.3" ml="sm">EDIT</Button>
+                  <Button color="dark.3" ml="sm">{isReadOnly ? 'VIEW' : 'EDIT'}</Button>
                 </Link>
               </Flex>
             )
@@ -173,7 +174,7 @@ export default function Collection({ params = {} }) {
         </div>
       }
       <Modal opened={confirmModalOpened} onClose={closeConfirmModal} title="Are you sure?" centered>
-        <Text size="md">Do you want to delete ALL documents matching this query?</Text>
+        <Text size="md">Do you want to delete {count || 'N/A'} documents matching this query?</Text>
         <Flex mt="lg" align="center" justify="space-between">
           <Button size="sm" color="gray" onClick={closeConfirmModal}>
             Cancel
